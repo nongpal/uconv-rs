@@ -1,24 +1,26 @@
 mod converter;
+//mod history;
 
 use clap::{Parser, Subcommand};
 
-enum Suhu {
-    Celcius,
-    Fahrenheit,
-    Kelvin,
-}
-
 #[derive(Subcommand, Debug)]
 enum Cmd {
-    ///
-    From { desc: String },
+    /// Conversion command
+    Convert {
+        #[arg(long)]
+        from: String,
 
+        #[arg(long)]
+        to: String,
+
+        #[arg(long)]
+        value: f64,
+    },
     /// Display all available unit
     List,
 
-    /// A value to convert to.
-    /// Can be integer or float
-    Value { id: f64 },
+    /// DIsplay history
+    History,
 }
 
 #[derive(Parser, Debug)]
@@ -30,4 +32,10 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+
+    match args.command {
+        Cmd::Convert { from, to, value } => todo!(),
+        Cmd::List => todo!(),
+        Cmd::History => todo!(),
+    }
 }

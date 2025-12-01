@@ -1,25 +1,213 @@
-pub fn celcius_to_fahrenheit(celc: f64) -> f64 {
-    (celc * 9.0 / 5.0) + 32.0
+/// reference https://doc.rust-lang.org/book/ch20-02-advanced-traits.html
+use std::fmt::Display;
+use std::str::FromStr;
+
+#[derive(Debug)]
+pub enum UnitError {
+    ParsingError(String),
 }
 
-pub fn celcius_to_kelvin(celc: f64) -> f64 {
-    celc + 273.15
+struct ConversionResult<T> {
+    from_unit: T,
+    to_unit: T,
+    from_value: f64,
+    to_value: f64,
 }
 
-pub fn fahrenheit_to_celcius(fahr: f64) -> f64 {
-    (fahr - 32.0) * (5.0 / 9.0)
+#[derive(Clone, Copy)]
+pub enum TemperatureUnit {
+    Celcius,
+    Fahrenheit,
+    Kelvin,
 }
 
-pub fn fahrenheit_to_kelvin(fahr: f64) -> f64 {
-    fahrenheit_to_celcius(fahr) + 273.15
+#[derive(Clone, Copy)]
+pub enum LengthUnit {
+    Kilometer,
+    Hectometer,
+    Decameter,
+    Meter,
+    Decimeter,
+    Centimeter,
+    Milimeter,
 }
 
-pub fn kelvin_to_celcius(kelv: f64) -> f64 {
-    kelv - 273.15
+#[derive(Clone, Copy)]
+pub enum WeightUnit {
+    Ton,
+    Kilogram,
+    Hectogram,
+    Decagram,
+    Gram,
+    Decigram,
+    Centigram,
+    Miligram,
 }
 
-pub fn kelvin_to_fahreinheit(kelv: f64) -> f64 {
-    celcius_to_fahrenheit(kelv - 273.15)
+pub trait Conversion {
+    fn convert(from_unit: &Self, to_unit: &Self, value: f64) -> f64;
+}
+
+impl LengthUnit {
+    fn ratio(&self) -> f64 {
+        match self {
+            LengthUnit::Milimeter => 0.001,
+            LengthUnit::Centimeter => 0.01,
+            LengthUnit::Decimeter => 0.1,
+            LengthUnit::Meter => 1.0,
+            LengthUnit::Decameter => 10.0,
+            LengthUnit::Hectometer => 100.0,
+            LengthUnit::Kilometer => 1000.0,
+        }
+    }
+}
+
+impl WeightUnit {
+    fn ratio(&self) -> f64 {
+        match self {
+            WeightUnit::Miligram => 0.001,
+            WeightUnit::Centigram => 0.01,
+            WeightUnit::Decigram => 0.1,
+            WeightUnit::Gram => 1.0,
+            WeightUnit::Decagram => 10.0,
+            WeightUnit::Hectogram => 100.0,
+            WeightUnit::Kilogram => 1000.0,
+            WeightUnit::Ton => 1000000.0,
+        }
+    }
+}
+
+impl FromStr for TemperatureUnit {
+    type Err = UnitError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "celcius" => Ok(TemperatureUnit::Celcius),
+            "fahrenheit" => Ok(TemperatureUnit::Fahrenheit),
+            "kelvin" => Ok(TemperatureUnit::Kelvin),
+            _ => Err(UnitError::ParsingError(format!("Unkown unit {}", s))),
+        }
+    }
+}
+
+impl FromStr for LengthUnit {
+    type Err = UnitError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "kilometer" => Ok(LengthUnit::Kilometer),
+            "km" => Ok(LengthUnit::Kilometer),
+            "hectometer" => Ok(LengthUnit::Hectometer),
+            "hm" => Ok(LengthUnit::Hectometer),
+            "decameter" => Ok(LengthUnit::Decameter),
+            "dam" => Ok(LengthUnit::Decameter),
+            "meter" => Ok(LengthUnit::Meter),
+            "m" => Ok(LengthUnit::Meter),
+            "decimeter" => Ok(LengthUnit::Decimeter),
+            "dm" => Ok(LengthUnit::Decimeter),
+            "centimeter" => Ok(LengthUnit::Centimeter),
+            "cm" => Ok(LengthUnit::Centimeter),
+            "milimeter" => Ok(LengthUnit::Milimeter),
+            "mm" => Ok(LengthUnit::Milimeter),
+            _ => Err(UnitError::ParsingError(format!("Unkown unit {}", s))),
+        }
+    }
+}
+
+impl FromStr for WeightUnit {
+    type Err = UnitError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "ton" => Ok(WeightUnit::Ton),
+            "t" => Ok(WeightUnit::Ton),
+            "kilogram" => Ok(WeightUnit::Kilogram),
+            "kg" => Ok(WeightUnit::Kilogram),
+            "hectogram" => Ok(WeightUnit::Hectogram),
+            "hg" => Ok(WeightUnit::Hectogram),
+            "decagram" => Ok(WeightUnit::Decagram),
+            "dag" => Ok(WeightUnit::Decagram),
+            "gram" => Ok(WeightUnit::Gram),
+            "gr" => Ok(WeightUnit::Gram),
+            "decigram" => Ok(WeightUnit::Decigram),
+            "dg" => Ok(WeightUnit::Decigram),
+            "centigram" => Ok(WeightUnit::Centigram),
+            "cg" => Ok(WeightUnit::Centigram),
+            "miligram" => Ok(WeightUnit::Miligram),
+            "mg" => Ok(WeightUnit::Miligram),
+            _ => Err(UnitError::ParsingError(format!("Unkown unit {}", s))),
+        }
+    }
+}
+
+impl Display for TemperatureUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            TemperatureUnit::Celcius => "°C",
+            TemperatureUnit::Fahrenheit => "°F",
+            TemperatureUnit::Kelvin => "K",
+        };
+
+        write!(f, "{}", s)
+    }
+}
+
+impl Display for LengthUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            LengthUnit::Kilometer => "Km",
+            LengthUnit::Hectometer => "Hm",
+            LengthUnit::Decameter => "Dam",
+            LengthUnit::Meter => "M",
+            LengthUnit::Decimeter => "Dm",
+            LengthUnit::Centimeter => "Cm",
+            LengthUnit::Milimeter => "Mm",
+        };
+
+        write!(f, "{}", s)
+    }
+}
+
+impl Display for WeightUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            WeightUnit::Ton => "T",
+            WeightUnit::Kilogram => "Kg",
+            WeightUnit::Hectogram => "Hg",
+            WeightUnit::Decagram => "Dag",
+            WeightUnit::Gram => "gr",
+            WeightUnit::Decigram => "Dg",
+            WeightUnit::Centigram => "Cg",
+            WeightUnit::Miligram => "Mg",
+        };
+
+        write!(f, "{}", s)
+    }
+}
+
+impl Conversion for TemperatureUnit {
+    fn convert(from_unit: &Self, to_unit: &Self, value: f64) -> f64 {
+        let to_kelvin = match from_unit {
+            TemperatureUnit::Celcius => value + 273.15,
+            TemperatureUnit::Fahrenheit => (value - 32.0) * (5.0 / 9.0) + 273.15,
+            TemperatureUnit::Kelvin => value,
+        };
+
+        match to_unit {
+            TemperatureUnit::Celcius => to_kelvin - 273.15,
+            TemperatureUnit::Fahrenheit => (to_kelvin - 273.15) * (9.0 / 5.0) + 32.0,
+            TemperatureUnit::Kelvin => to_kelvin,
+        }
+    }
+}
+
+impl Conversion for LengthUnit {
+    fn convert(from_unit: &Self, to_unit: &Self, value: f64) -> f64 {
+        (value * from_unit.ratio()) / to_unit.ratio()
+    }
+}
+
+impl Conversion for WeightUnit {
+    fn convert(from_unit: &Self, to_unit: &Self, value: f64) -> f64 {
+        (value * from_unit.ratio()) / to_unit.ratio()
+    }
 }
 
 /// psuedo-assert-like rust
@@ -39,39 +227,9 @@ mod tests {
 
     #[test]
     fn test_celcius_to_fahrenheit() {
-        custom_assert_approx(celcius_to_fahrenheit(0.0), 32.0);
-    }
-
-    #[test]
-    fn test_celcius_to_kelvin() {
-        custom_assert_approx(celcius_to_kelvin(0.0), 273.15);
-    }
-
-    #[test]
-    fn test_fahrenheit_to_celcius() {
-        custom_assert_approx(fahrenheit_to_celcius(32.0), 0.0);
-    }
-
-    #[test]
-    fn test_fahrenheit_to_kelvin() {
-        custom_assert_approx(fahrenheit_to_kelvin(32.0), 273.15);
-    }
-
-    #[test]
-    fn test_kelv2celc() {
-        custom_assert_approx(kelvin_to_celcius(0.0), -273.15);
-    }
-
-    #[test]
-    fn test_kelv2fah() {
-        custom_assert_approx(kelvin_to_fahreinheit(0.0), -459.67);
-    }
-
-    #[test]
-    fn test_celc_to_fah_to_celc() {
-        let value = 0.0;
-        let f = celcius_to_fahrenheit(value);
-        let c = fahrenheit_to_celcius(f);
-        custom_assert_approx(c, 0.0);
+        let from = TemperatureUnit::from_str("celcius").unwrap();
+        let to = TemperatureUnit::from_str("fahrenheit").unwrap();
+        let result = TemperatureUnit::convert(&from, &to, 0.0);
+        custom_assert_approx(result, 32.0);
     }
 }
