@@ -3,9 +3,9 @@ use std::fs;
 use std::io::ErrorKind;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct History {
-    from_unit: String,
-    to_unit: String,
+pub struct History<T> {
+    from_unit: T,
+    to_unit: T,
     value_unit: f64,
     output_unit: f64,
 }
