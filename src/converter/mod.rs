@@ -56,17 +56,17 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
     match (from, to) {
         (MetricSystem::Tempr(from), MetricSystem::Tempr(to)) => {
             let res = TemperatureUnit::convert(&from, &to, value);
-            println!("{value}{from} = {res}{to}");
+            println!("{value} {from} = {res} {to}");
         }
 
         (MetricSystem::Len(from), MetricSystem::Len(to)) => {
             let res = LengthUnit::convert(&from, &to, value);
-            println!("{value}{from} = {res}{to}");
+            println!("{value} {from} = {res} {to}");
         }
 
         (MetricSystem::Weight(from), MetricSystem::Weight(to)) => {
             let res = WeightUnit::convert(&from, &to, value);
-            println!("{value}{from} = {res}{to}");
+            println!("{value} {from} = {res} {to}");
         }
 
         _ => {
@@ -80,5 +80,22 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
 }
 
 pub fn run_list() {
-    todo!();
+    println!("List all units:");
+
+    println!("  Temperature:");
+    for t in TemperatureUnit::ALL {
+        println!("      - {:?} ({})", t, &t.to_string());
+    }
+    println!("");
+
+    println!("  Length:");
+    for l in LengthUnit::ALL {
+        println!("      - {:?} ({})", l, &l.to_string().to_lowercase());
+    }
+    println!("");
+
+    println!("  Weight:");
+    for w in WeightUnit::ALL {
+        println!("      - {:?} ({})", w, &w.to_string().to_lowercase());
+    }
 }

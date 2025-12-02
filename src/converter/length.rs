@@ -29,6 +29,28 @@ impl LengthUnit {
     pub fn convert(from_unit: &Self, to_unit: &Self, value: f64) -> f64 {
         (value * from_unit.ratio()) / to_unit.ratio()
     }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Kilometer => "kilometer",
+            Self::Hectometer => "hectometer",
+            Self::Decameter => "decameter",
+            Self::Meter => "meter",
+            Self::Decimeter => "decimeter",
+            Self::Centimeter => "centimeter",
+            Self::Milimeter => "milimeter",
+        }
+    }
+
+    pub const ALL: [Self; 7] = [
+        Self::Kilometer,
+        Self::Hectometer,
+        Self::Decameter,
+        Self::Meter,
+        Self::Decimeter,
+        Self::Centimeter,
+        Self::Milimeter,
+    ];
 }
 
 impl str::FromStr for LengthUnit {

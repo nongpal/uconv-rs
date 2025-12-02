@@ -6,7 +6,7 @@ use super::error::{UnitError, custom_assert_approx};
 
 #[derive(Clone, Copy, Debug)]
 pub enum TemperatureUnit {
-    Celcius,
+    Celsius,
     Fahrenheit,
     Kelvin,
 }
@@ -15,7 +15,7 @@ impl FromStr for TemperatureUnit {
     type Err = UnitError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "celcius" => Ok(TemperatureUnit::Celcius),
+            "celsius" => Ok(TemperatureUnit::Celsius),
             "fahrenheit" => Ok(TemperatureUnit::Fahrenheit),
             "kelvin" => Ok(TemperatureUnit::Kelvin),
             _ => Err(UnitError::UnknownUnit {
@@ -29,7 +29,7 @@ impl FromStr for TemperatureUnit {
 impl Display for TemperatureUnit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            TemperatureUnit::Celcius => "°C",
+            TemperatureUnit::Celsius => "°C",
             TemperatureUnit::Fahrenheit => "°F",
             TemperatureUnit::Kelvin => "K",
         };
@@ -41,17 +41,27 @@ impl Display for TemperatureUnit {
 impl TemperatureUnit {
     pub fn convert(from_unit: &Self, to_unit: &Self, value: f64) -> f64 {
         let to_kelvin = match from_unit {
-            TemperatureUnit::Celcius => value + 273.15,
+            TemperatureUnit::Celsius => value + 273.15,
             TemperatureUnit::Fahrenheit => (value - 32.0) * (5.0 / 9.0) + 273.15,
             TemperatureUnit::Kelvin => value,
         };
 
         match to_unit {
-            TemperatureUnit::Celcius => to_kelvin - 273.15,
+            TemperatureUnit::Celsius => to_kelvin - 273.15,
             TemperatureUnit::Fahrenheit => (to_kelvin - 273.15) * (9.0 / 5.0) + 32.0,
             TemperatureUnit::Kelvin => to_kelvin,
         }
     }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Celsius => "celcius",
+            Self::Kelvin => "kelvin",
+            Self::Fahrenheit => "fahrenheit",
+        }
+    }
+
+    pub const ALL: [Self; 3] = [Self::Celsius, Self::Kelvin, Self::Fahrenheit];
 }
 
 #[cfg(test)]
