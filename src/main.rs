@@ -16,7 +16,7 @@ enum Cmd {
         #[arg(long)]
         to: String,
 
-        #[arg(long)]
+        #[arg(long, allow_negative_numbers = true)]
         value: f64,
     },
     /// Display all available unit
