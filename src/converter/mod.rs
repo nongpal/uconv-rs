@@ -9,8 +9,11 @@ use length::LengthUnit;
 use temperature::TemperatureUnit;
 use weight::WeightUnit;
 
+use crate::history::{History, save_history};
+
 use self::error::{UnitError, handle_error};
 
+#[derive(Debug)]
 enum MetricSystem {
     Tempr(TemperatureUnit),
     Len(LengthUnit),
@@ -40,6 +43,16 @@ impl FromStr for MetricSystem {
     }
 }
 
+impl MetricSystem {
+    fn category_name(&self) -> &'static str {
+        match self {
+            MetricSystem::Tempr(_) => "Temperature",
+            MetricSystem::Len(_) => "Length",
+            MetricSystem::Weight(_) => "Weight",
+        }
+    }
+}
+
 fn parse_or_exit(s: &str, args: &'static str) -> MetricSystem {
     MetricSystem::from_str(s)
         .map_err(|_| UnitError::UnknownUnit {
@@ -53,27 +66,44 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
     let from = parse_or_exit(from_unit, &"--from");
     let to = parse_or_exit(to_unit, &"--to");
 
-    match (from, to) {
+    match (&from, &to) {
         (MetricSystem::Tempr(from), MetricSystem::Tempr(to)) => {
             let res = TemperatureUnit::convert(&from, &to, value);
             println!("{value} {from} = {res} {to}");
+            save_history(History {
+                from_unit: from.as_str().to_string(),
+                to_unit: to.as_str().to_string(),
+                value_unit: value,
+                output_unit: res,
+            });
         }
 
         (MetricSystem::Len(from), MetricSystem::Len(to)) => {
             let res = LengthUnit::convert(&from, &to, value);
             println!("{value} {from} = {res} {to}");
+            save_history(History {
+                from_unit: from.as_str().to_string(),
+                to_unit: to.as_str().to_string(),
+                value_unit: value,
+                output_unit: res,
+            });
         }
 
         (MetricSystem::Weight(from), MetricSystem::Weight(to)) => {
             let res = WeightUnit::convert(&from, &to, value);
             println!("{value} {from} = {res} {to}");
+            save_history(History {
+                from_unit: from.as_str().to_string(),
+                to_unit: to.as_str().to_string(),
+                value_unit: value,
+                output_unit: res,
+            });
         }
 
         _ => {
-            eprintln!(
-                "Error: convert between different unit categories is not permit!\n(--from: {} --to: {})",
-                &from_unit, &to_unit
-            );
+            eprintln!("Error: convert between different unit categories is not permit!");
+            eprintln!("--from: {} [{}]", from_unit, &from.category_name());
+            eprintln!("--to: {} [{}]", to_unit, &to.category_name());
             std::process::exit(1);
         }
     }
