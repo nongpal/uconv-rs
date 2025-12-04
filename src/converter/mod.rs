@@ -79,6 +79,10 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
         }
 
         (MetricSystem::Len(from), MetricSystem::Len(to)) => {
+            if value < 0.0 {
+                eprintln!("Error: `{}` is invalid value for Length Unit!", value);
+                std::process::exit(1)
+            }
             let res = LengthUnit::convert(&from, &to, value);
             println!("{value} {from} = {res} {to}");
             save_history(History {
@@ -90,6 +94,10 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
         }
 
         (MetricSystem::Weight(from), MetricSystem::Weight(to)) => {
+            if value < 0.0 {
+                eprintln!("Error: `{}` is invalid value for Weight Unit!", value);
+                std::process::exit(1)
+            }
             let res = WeightUnit::convert(&from, &to, value);
             println!("{value} {from} = {res} {to}");
             save_history(History {
