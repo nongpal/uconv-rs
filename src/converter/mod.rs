@@ -24,15 +24,15 @@ impl FromStr for MetricSystem {
     type Err = UnitError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Ok(t) = TemperatureUnit::from_str(&s) {
+        if let Ok(t) = TemperatureUnit::from_str(s) {
             return Ok(MetricSystem::Tempr(t));
         }
 
-        if let Ok(l) = LengthUnit::from_str(&s) {
+        if let Ok(l) = LengthUnit::from_str(s) {
             return Ok(MetricSystem::Len(l));
         }
 
-        if let Ok(w) = WeightUnit::from_str(&s) {
+        if let Ok(w) = WeightUnit::from_str(s) {
             return Ok(MetricSystem::Weight(w));
         }
 
@@ -63,12 +63,12 @@ fn parse_or_exit(s: &str, args: &'static str) -> MetricSystem {
 }
 
 pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
-    let from = parse_or_exit(from_unit, &"--from");
-    let to = parse_or_exit(to_unit, &"--to");
+    let from = parse_or_exit(from_unit, "--from");
+    let to = parse_or_exit(to_unit, "--to");
 
     match (&from, &to) {
         (MetricSystem::Tempr(from), MetricSystem::Tempr(to)) => {
-            let res = TemperatureUnit::convert(&from, &to, value);
+            let res = TemperatureUnit::convert(from, to, value);
             println!("{value} {from} = {res} {to}");
             save_history(History {
                 from_unit: from.as_str().to_string(),
@@ -83,7 +83,7 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
                 eprintln!("Error: `{}` is invalid value for Length Unit!", value);
                 std::process::exit(1)
             }
-            let res = LengthUnit::convert(&from, &to, value);
+            let res = LengthUnit::convert(from, to, value);
             println!("{value} {from} = {res} {to}");
             save_history(History {
                 from_unit: from.as_str().to_string(),
@@ -98,7 +98,7 @@ pub fn run_conversion(from_unit: &str, to_unit: &str, value: f64) {
                 eprintln!("Error: `{}` is invalid value for Weight Unit!", value);
                 std::process::exit(1)
             }
-            let res = WeightUnit::convert(&from, &to, value);
+            let res = WeightUnit::convert(from, to, value);
             println!("{value} {from} = {res} {to}");
             save_history(History {
                 from_unit: from.as_str().to_string(),
@@ -124,15 +124,13 @@ pub fn run_list() {
     for t in TemperatureUnit::ALL {
         println!("      - {:?} ({})", t, &t.to_string());
     }
-    println!("");
 
-    println!("  Length:");
+    println!("\n  Length:");
     for l in LengthUnit::ALL {
         println!("      - {:?} ({})", l, &l.to_string().to_lowercase());
     }
-    println!("");
 
-    println!("  Weight:");
+    println!("\n  Weight:");
     for w in WeightUnit::ALL {
         println!("      - {:?} ({})", w, &w.to_string().to_lowercase());
     }

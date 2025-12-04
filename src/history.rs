@@ -13,10 +13,10 @@ pub struct History {
 const FILE_NAME: &str = "conversion.json";
 
 pub fn read_history() -> Vec<History> {
-    if let Ok(data) = fs::read_to_string(FILE_NAME) {
-        if let Ok(history) = serde_json::from_str::<Vec<History>>(&data) {
-            return history;
-        }
+    if let Ok(data) = fs::read_to_string(FILE_NAME)
+        && let Ok(history) = serde_json::from_str::<Vec<History>>(&data)
+    {
+        return history;
     }
 
     Vec::new()
